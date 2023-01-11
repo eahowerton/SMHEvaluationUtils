@@ -7,6 +7,31 @@ suppressMessages({
 
 
 #### exclusion function ####
+test_that("Test implement_all_exclusions: cum case target",{
+  pp <- data.table(round = c(1,2,3),
+                   target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"))
+  sr <- data.table(round = c(1,2,3),
+                   scenario_id = c("A", "B", "C"))
+  d <- data.table(model_name = "Ensemble",
+                  round = 1,
+                  scenario_id = "A",
+                  target_end_date = "2022-01-01",
+                  location = "US",
+                  target = c(rep("inc case",3),"cum case"),
+                  quantile = c(0.01, 0.1, 0.2, 0.5),
+                  value = c(0,1,2, 4))
+  expected <- data.table(model_name = "Ensemble",
+                         round = 1,
+                         scenario_id = "A",
+                         target_end_date = "2022-01-01",
+                         location = "US",
+                         target = "inc case",
+                         quantile = c(0.01, 0.1, 0.2),
+                         value = c(0,1,2))
+  expect_equal(implement_all_exclusions(d, pp, sr), expected)
+})
+
+
 test_that("Test implement_all_exclusions: NA quantiles and values",{
   pp <- data.table(round = c(1,2,3),
                    target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"))
@@ -202,6 +227,16 @@ test_that("Test implement_all_exclusions: scenario/round not included",{
 
 
 #### exclusion helpers ####
+
+test_that("Test exclude_cum_proj: NA quantiles",{
+  d <- setDT(expand.grid(target = c("inc case", "cum case"),
+                         quantile = c(0.1, 0.2, 0.5),
+                         value = c(0,1,2)))
+  expected <- d[target != "cum case"]
+  expect_equal(exclude_cum_proj(d), expected)
+})
+
+
 test_that("Test exclude_NA_vals: NA quantiles",{
   d <- setDT(expand.grid(quantile = c(NA, 0.1, 0.2, 0.5),
                          value = c(0,1,2)))

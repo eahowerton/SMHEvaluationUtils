@@ -17,6 +17,7 @@
 implement_all_exclusions <- function(proj,
                                      proj_period,
                                      scenario_round,
+                                     inc_only = TRUE,
                                      summarize_exclusions = FALSE,
                                      summarize_exclusions_path = "code/evaluation/data/exclusions.csv"){
   proj <- exclude_NA_vals(proj)
@@ -27,6 +28,9 @@ implement_all_exclusions <- function(proj,
   proj <- exclude_non_monotonic(proj)
   proj <- exclude_outside_projperiod(proj, proj_period)
   proj <- exclude_wrong_round(proj, scenario_round)
+  if(inc_only){
+   proj <- exclude_cum_proj(proj)
+  }
   # summarize across all exclusions
   proj[, any_exclusion := rowSums(select(.SD, starts_with("e_")))] %>%
     .[, any_exclusion := ifelse(any_exclusion == 0, 0, 1)]
@@ -39,6 +43,10 @@ implement_all_exclusions <- function(proj,
 }
 
 #### HELPERS -------------------------------------------------------------------
+
+exclude_cum_proj <- function(proj){
+  proj[substr(target,1,3) != "cum"]
+}
 
 exclude_NA_vals <- function(proj){
   proj[!is.na(value) & !is.na(quantile)]
