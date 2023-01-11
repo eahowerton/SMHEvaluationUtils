@@ -15,26 +15,20 @@
 #'
 #' @export
 implement_all_exclusions <- function(proj,
-                                     NA_vals = TRUE,
-                                     quantile01 = TRUE,
-                                     non_public = TRUE,
-                                     territories = TRUE,
-                                     model_names = TRUE,
-                                     non_monotonic = TRUE,
-                                     outside_projperiod = TRUE, proj_period,
-                                     wrong_round = TRUE, scenario_round,
+                                     proj_period,
+                                     scenario_round,
                                      summarize_exclusions = FALSE,
                                      summarize_exclusions_path = "code/evaluation/data/exclusions.csv"){
-  if(NA_vals){exclude_NA_vals(proj)}
-  if(quantile01){exclude_quantile01(proj)}
-  if(non_public){exclude_non_public(proj)}
-  if(territories){exclude_territories(proj)}
-  if(model_names){exclude_model_names(proj)}
-  if(non_monotonic){exclude_non_monotonic(proj)}
-  if(outside_projperiod){exclude_outside_projperiod(proj, proj_period)}
-  if(wrong_round){exclude_wrong_round(proj, scenario_round)}
+  proj <- exclude_NA_vals(proj)
+  proj <- exclude_quantile01(proj)
+  proj <- exclude_non_public(proj)
+  proj <- exclude_territories(proj)
+  proj <- exclude_model_names(proj)
+  proj <- exclude_non_monotonic(proj)
+  proj <- exclude_outside_projperiod(proj, proj_period)
+  proj <- exclude_wrong_round(proj, scenario_round)
   # summarize across all exclusions
-  proj[, any_exclusion := rowSums(select(., starts_with("e_")))] %>%
+  proj[, any_exclusion := rowSums(select(.SD, starts_with("e_")))] %>%
     .[, any_exclusion := ifelse(any_exclusion == 0, 0, 1)]
   # summarize exclusions
   if(summarize_exclusions){
@@ -73,7 +67,7 @@ exclude_model_names <- function(proj,
 exclude_non_monotonic <- function(proj, tol = 1E-4){
   proj[order(quantile)] %>%
     .[, e_non_monotonic := ifelse(any(diff(value) < -1E-4), 1, 0),
-       by = .(round, scenario_name,  target_end_date, location, target, model_name)]
+       by = .(round, scenario_id,  target_end_date, location, target, model_name)]
 }
 
 exclude_outside_projperiod <- function(proj, proj_period){

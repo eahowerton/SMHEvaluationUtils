@@ -7,7 +7,198 @@ suppressMessages({
 
 
 #### exclusion function ####
-# TO ADD
+test_that("Test implement_all_exclusions: NA quantiles and values",{
+  pp <- data.table(round = c(1,2,3),
+                   target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"))
+  sr <- data.table(round = c(1,2,3),
+                   scenario_id = c("A", "B", "C"))
+  d <- data.table(model_name = "Ensemble",
+                  round = 1,
+                  scenario_id = "A",
+                  target_end_date = "2022-01-01",
+                  location = "US",
+                  target = "inc case",
+                  quantile = c(NA, 0.1, 0.2, 0.5),
+                  value = c(0,1,2, NA))
+  expected <- data.table(model_name = "Ensemble",
+                  round = 1,
+                  scenario_id = "A",
+                  target_end_date = "2022-01-01",
+                  location = "US",
+                  target = "inc case",
+                  quantile = c(0.1, 0.2),
+                  value = c(1,2))
+  expect_equal(implement_all_exclusions(d, pp, sr), expected)
+})
+
+test_that("Test implement_all_exclusions: 0 and 1 quantile",{
+  pp <- data.table(round = c(1,2,3),
+                   target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"))
+  sr <- data.table(round = c(1,2,3),
+                   scenario_id = c("A", "B", "C"))
+  d <- data.table(model_name = "Ensemble",
+                  round = 1,
+                  scenario_id = "A",
+                  target_end_date = "2022-01-01",
+                  location = "US",
+                  target = "inc case",
+                  quantile = c(0, 0.1, 0.2, 0.5,1),
+                  value = c(0,1,2, 3,4))
+  expected <- data.table(model_name = "Ensemble",
+                         round = 1,
+                         scenario_id = "A",
+                         target_end_date = "2022-01-01",
+                         location = "US",
+                         target = "inc case",
+                         quantile = c(0.1, 0.2, 0.5),
+                         value = c(1,2, 3))
+  expect_equal(implement_all_exclusions(d, pp, sr), expected)
+})
+
+test_that("Test implement_all_exclusions: round 8, 10",{
+  pp <- data.table(round = c(1,2,3),
+                   target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"))
+  sr <- data.table(round = c(1,2,3),
+                   scenario_id = c("A", "B", "C"))
+  d <- data.table(model_name = "Ensemble",
+                  round = c(1,1,1,8,10),
+                  scenario_id = "A",
+                  target_end_date = "2022-01-01",
+                  location = "US",
+                  target = "inc case",
+                  quantile = c(0.1, 0.2, 0.5,0.5,0.5),
+                  value = c(0,1,2, 3,4))
+  expected <- data.table(model_name = "Ensemble",
+                         round = c(1,1,1),
+                         scenario_id = "A",
+                         target_end_date = "2022-01-01",
+                         location = "US",
+                         target = "inc case",
+                         quantile = c(0.1, 0.2, 0.5),
+                         value = c(0,1,2))
+  expect_equal(implement_all_exclusions(d, pp, sr), expected)
+})
+
+test_that("Test implement_all_exclusions: territories",{
+  pp <- data.table(round = c(1,2,3),
+                   target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"))
+  sr <- data.table(round = c(1,2,3),
+                   scenario_id = c("A", "B", "C"))
+  d <- data.table(model_name = "Ensemble",
+                  round = 1,
+                  scenario_id = "A",
+                  target_end_date = "2022-01-01",
+                  location = c("US","US", "US", "US", "66"),
+                  target = "inc case",
+                  quantile = c(0.1, 0.2, 0.5,0.5,0.5),
+                  value = c(0,1,2, 3,4))
+  expected <- data.table(model_name = "Ensemble",
+                         round = 1,
+                         scenario_id = "A",
+                         target_end_date = "2022-01-01",
+                         location = c("US","US", "US", "US"),
+                         target = "inc case",
+                         quantile = c(0.1, 0.2, 0.5,0.5),
+                         value = c(0,1,2, 3))
+  expect_equal(implement_all_exclusions(d, pp, sr), expected)
+})
+
+
+test_that("Test implement_all_exclusions: model names",{
+  pp <- data.table(round = c(1,2,3),
+                   target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"))
+  sr <- data.table(round = c(1,2,3),
+                   scenario_id = c("A", "B", "C"))
+  d <- data.table(model_name = c(rep("Ensemble", 4), "OliverWyman-Navigator"),
+                  round = 1,
+                  scenario_id = "A",
+                  target_end_date = "2022-01-01",
+                  location = "US",
+                  target = "inc case",
+                  quantile = c(0.1, 0.2, 0.5,0.5,0.5),
+                  value = c(0,1,2, 3,4))
+  expected <- data.table(model_name = "Ensemble",
+                         round = 1,
+                         scenario_id = "A",
+                         target_end_date = "2022-01-01",
+                         location = "US",
+                         target = "inc case",
+                         quantile = c(0.1, 0.2, 0.5,0.5),
+                         value = c(0,1,2, 3))
+  expect_equal(implement_all_exclusions(d, pp, sr), expected)
+})
+
+test_that("Test implement_all_exclusions: non-increasing CDF",{
+  pp <- data.table(round = c(1,2,3),
+                   target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"))
+  sr <- data.table(round = c(1,2,3),
+                   scenario_id = c("A", "B", "C"))
+  d <- data.table(model_name = c(rep("Ensemble", 3), rep("A",3)),
+                  round = 1,
+                  scenario_id = "A",
+                  target_end_date = "2022-01-01",
+                  location = "US",
+                  target = "inc case",
+                  quantile = rep(c(0.1, 0.2, 0.5)),
+                  value = c(0,1,2, 5, 3,4))
+  expected <- data.table(model_name = "Ensemble",
+                         round = 1,
+                         scenario_id = "A",
+                         target_end_date = "2022-01-01",
+                         location = "US",
+                         target = "inc case",
+                         quantile = c(0.1, 0.2, 0.5),
+                         value = c(0,1,2))
+  expect_equal(implement_all_exclusions(d, pp, sr), expected)
+})
+
+test_that("Test implement_all_exclusions: wrong dates with each round",{
+  pp <- data.table(round = c(1,2,3),
+                   target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"))
+  sr <- data.table(round = c(1,2,3),
+                   scenario_id = c("A", "B", "C"))
+  d <- data.table(model_name = "Ensemble",
+                  round = c(1,2,3),
+                  scenario_id =  c("A", "B", "C"),
+                  target_end_date = "2022-01-01",
+                  location = "US",
+                  target = "inc case",
+                  quantile = c(0.1, 0.2, 0.5),
+                  value = c(0,1,2))
+  expected <- data.table(model_name = "Ensemble",
+                         round = 1,
+                         scenario_id = "A",
+                         target_end_date = "2022-01-01",
+                         location = "US",
+                         target = "inc case",
+                         quantile = c(0.1),
+                         value = c(0))
+  expect_equal(implement_all_exclusions(d, pp, sr), expected)
+})
+
+test_that("Test implement_all_exclusions: scenario/round not included",{
+  pp <- data.table(round = c(1,2,3),
+                   target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"))
+  sr <- data.table(round = c(1,2,3),
+                   scenario_id = c("A", "B", "C"))
+  d <- data.table(model_name = "Ensemble",
+                  round = c(1,2,3),
+                  scenario_id = "A",
+                  target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"),
+                  location = "US",
+                  target = "inc case",
+                  quantile = c(0.1, 0.2, 0.5),
+                  value = c(0,1,2))
+  expected <- data.table(model_name = "Ensemble",
+                         round = 1,
+                         scenario_id = "A",
+                         target_end_date = "2022-01-01",
+                         location = "US",
+                         target = "inc case",
+                         quantile = c(0.1),
+                         value = c(0))
+  expect_equal(implement_all_exclusions(d, pp, sr), expected)
+})
 
 
 #### exclusion helpers ####
@@ -69,7 +260,7 @@ test_that("Test exclude_territories: all territories",{
   expect_equal(exclude_territories(d), expected)
 })
 
-test_that("Test exclude_model_names: all territories",{
+test_that("Test exclude_model_names: models",{
   d <- setDT(expand.grid(model_name = c("OliverWyman-Navigator",
                                         "IHME-IHME_COVID_model_deaths_unscaled",
                                         "Ensemble"),
@@ -83,7 +274,7 @@ test_that("Test exclude_model_names: all territories",{
 test_that("Test exclude_non_monotonic: non-increasing CDF",{
   d <- data.table(model_name = "Ensemble",
                          round = 1,
-                         scenario_name = "A",
+                         scenario_id = "A",
                          target_end_date = "2022-01-01",
                          location = "US",
                          target = "inc case",
@@ -91,7 +282,7 @@ test_that("Test exclude_non_monotonic: non-increasing CDF",{
                          value = c(0,1,2))
   d2 <- data.table(model_name = rep("rm",4),
                    round = 1,
-                   scenario_name = "A",
+                   scenario_id = "A",
                    target_end_date = "2022-01-01",
                    location = "US",
                    target = "inc case",
