@@ -1,4 +1,4 @@
-#' from raw projections, generate one data.table with all
+#' from raw SMH projections, generate one data.table with all
 #' projections after exclusions
 #'
 #' @param proj list of projections where each element is one round
@@ -10,7 +10,7 @@
 #' @return data.table with all projections included (after exclusions)
 #'
 #' @export
-compile_projections <- function(proj,
+compile_SMH_projections <- function(proj,
                                 list2round,
                                 proj_period_key,
                                 scenario_round_key,

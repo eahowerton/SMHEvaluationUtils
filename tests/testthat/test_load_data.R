@@ -1,5 +1,5 @@
 #### compile projections function ####
-test_that("Test compile_projections: simple",{
+test_that("Test compile_SMH_projections: simple",{
   l2r <- c("1", "3")
   pp <- data.table(round = c(1,3),
                    target_end_date = c("2022-01-01", "2022-01-02"))
@@ -28,13 +28,13 @@ test_that("Test compile_projections: simple",{
                                .[, ":=" (round = 3,
                                          target_end_date= as.IDate(target_end_date),
                                          target = "inc case")]))
-  expect_equal(compile_projections(proj = d, list2round = l2r,
+  expect_equal(compile_SMH_projections(proj = d, list2round = l2r,
                                    proj_period_key = pp,
                                    scenario_round_key = sr),
                expected)
 })
 
-test_that("Test compile_projections: only keep 1 round",{
+test_that("Test compile_SMH_projections: only keep 1 round",{
   l2r <- c("1", "3")
   pp <- data.table(round = c(1,3),
                    target_end_date = c("2022-01-01", "2022-01-02"))
@@ -59,14 +59,14 @@ test_that("Test compile_projections: only keep 1 round",{
     .[, ":=" (round = 1,
               target_end_date= as.IDate(target_end_date),
               target = "inc case")]
-  expect_equal(compile_projections(proj = d, list2round = l2r,
+  expect_equal(compile_SMH_projections(proj = d, list2round = l2r,
                                    proj_period_key = pp,
                                    scenario_round_key = sr,
                                    rounds_to_include = 1),
                expected)
 })
 
-test_that("Test compile_projections: exclude R1",{
+test_that("Test compile_SMH_projections: exclude R1",{
   l2r <- c("1", "3", "2")
   pp <- data.table(round = c(1,3,2),
                    target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"))
@@ -102,14 +102,14 @@ test_that("Test compile_projections: exclude R1",{
                                .[, ":=" (round = 3,
                                          target_end_date= as.IDate(target_end_date),
                                          target = "inc case")]))
-  expect_equal(compile_projections(proj = d, list2round = l2r,
+  expect_equal(compile_SMH_projections(proj = d, list2round = l2r,
                                    proj_period_key = pp,
                                    scenario_round_key = sr,
                                    rounds_to_include = c(1,3)),
                expected)
 })
 
-test_that("Test compile_projections: exclude R10 (non-public)",{
+test_that("Test compile_SMH_projections: exclude R10 (non-public)",{
   l2r <- sort(as.character(1:16))
   pp <- data.table(round = c(1,2,3),
                    target_end_date = c("2022-01-01", "2022-01-02", "2022-01-03"))
@@ -138,7 +138,7 @@ test_that("Test compile_projections: exclude R10 (non-public)",{
                          quantile = c(0.01, 0.1, 0.2, 0.5),
                          value = c(0,1,2, 4),
                          round = 1)
-  expect_equal(compile_projections(proj = d, list2round = l2r,
+  expect_equal(compile_SMH_projections(proj = d, list2round = l2r,
                                    proj_period_key = pp,
                                    scenario_round_key = sr),
                expected)
