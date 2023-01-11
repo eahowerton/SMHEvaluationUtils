@@ -6,22 +6,19 @@
 \usage{
 implement_all_exclusions(
   proj,
-  NA_vals = TRUE,
-  quantile01 = TRUE,
-  non_public = TRUE,
-  territories = TRUE,
-  model_names = TRUE,
-  non_monotonic = TRUE,
-  outside_projperiod = TRUE,
   proj_period,
-  wrong_round = TRUE,
   scenario_round,
+  inc_only = TRUE,
   summarize_exclusions = FALSE,
   summarize_exclusions_path = "code/evaluation/data/exclusions.csv"
 )
 }
 \arguments{
 \item{proj}{data.table containing projections}
+
+\item{proj_period}{data.frame containing all accepted target_end_dates (by round)}
+
+\item{scenario_round}{data.frame containing all accepted scenarios (by round)}
 
 \item{NA_vals}{logical TRUE to exclude all NA values in \code{value} or \code{quantile} columns}
 
@@ -35,11 +32,7 @@ implement_all_exclusions(
 
 \item{outside_projperiod}{logical TRUE to exclude projections outside of the official SMH projection period}
 
-\item{proj_period}{data.frame containing all accepted target_end_dates (by round)}
-
 \item{wrong_round}{logical TRUE to exclude projections that were submitted for scenarios from a different round}
-
-\item{scenario_round}{data.frame containing all accepted scenarios (by round)}
 }
 \value{
 data.table containing projections after exclusion
