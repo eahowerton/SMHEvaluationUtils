@@ -2,6 +2,10 @@
 
 export(compile_SMH_projections)
 export(implement_all_exclusions)
+export(load_all_null_projs)
+export(load_null_fh)
+export(load_null_gam)
+export(load_null_naive)
 importFrom(data.table,":=")
 importFrom(data.table,.BY)
 importFrom(data.table,.EACHI)
