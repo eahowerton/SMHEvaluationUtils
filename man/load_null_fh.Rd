@@ -4,10 +4,7 @@
 \alias{load_null_fh}
 \title{load projections for COVID-19 Forecast Hub 4-week ahead ensemble null model}
 \usage{
-load_null_fh(
-  p = "code/evaluation/data/FH_proj.csv",
-  only_win_proj_period = TRUE
-)
+load_null_fh(pp_flag = TRUE, p = "code/evaluation/data/FH_proj.csv")
 }
 \arguments{
 \item{p}{string path to file containing null projections}
