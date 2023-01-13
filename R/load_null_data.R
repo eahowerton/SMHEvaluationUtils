@@ -56,8 +56,8 @@ load_null_fh <- function(pp_flag = TRUE,
              scenario_name = "NULL-MODEL")]
   if(pp_flag){
     proj_null_fh <- proj_null_fh[proj_period_flag == pp_flag]
+    proj_null_fh <- proj_null_fh[, ":=" (proj_period_flag = NULL)]
   }
-  proj_null_fh <- proj_null_fh[, ":=" (proj_period_flag = NULL)]
   return(proj_null_fh)
 }
 
