@@ -46,8 +46,8 @@ plaus_weight_by_scenario <- function(p = "code/evaluation/data/MostPlausibleScen
     setnames(old = "scenario", new = "scenario_letter")
     proj <- plaus[proj[, scenario_letter := substr(scenario_id, 1,1)], on = .(scenario_letter, round)] %>%
       # set plaus weights to 1 for null models
-      .[, ":=" (plaus_scenario = ifelse(substr(model_name,1,4) == "null", 1, plaus_scenario),
-                scenario_letter = NULL)]
+      .[, ":=" (plaus_scenario = ifelse(substr(model_name,1,4) == "null", 1, plaus_scenario))]
+    proj <- proj[ , scenario_letter := NULL]
     return(proj)
 }
 
