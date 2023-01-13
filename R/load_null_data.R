@@ -57,8 +57,7 @@ load_null_fh <- function(pp_flag = TRUE,
   if(pp_flag){
     proj_null_fh <- proj_null_fh[proj_period_flag == pp_flag]
   }
-  proj_null_fh <- proj_null_fh[, ":=" (proj_period_flag = NULL,
-                                       trunc_flag = NULL)]
+  proj_null_fh <- proj_null_fh[, ":=" (proj_period_flag = NULL)]
   return(proj_null_fh)
 }
 
