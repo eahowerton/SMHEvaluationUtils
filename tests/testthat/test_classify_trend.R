@@ -5,9 +5,30 @@ suppressMessages({
   library(data.table)
 })
 
+#### full classification function ####
+test_that("Test full_classif: no group by",{
+  l <- 1
+  pct_f <- 0.2
+  d <- setDT(expand.grid(target = c("A", "B", "C"),
+                         obs = 1:5,
+                         target_end_date = "2022-01-01"))
+  lwr <- quantile(log(2:5)-log(1:4), 0.4)
+  upr <- quantile(log(2:5)-log(1:4), 0.6)
+  expected <- copy(d)
+  expected <- expected %>%
+    .[, ":=" (pct_change = c(NA, log(2:5)-log(1:4)),
+              lwr_quantile = lwr,
+              upr_quantile = upr), by = .(target)] %>%
+    .[, change_bin := ifelse(pct_change > upr_quantile, "inc",
+                             ifelse(pct_change < lwr_quantile, "dec", "flat"))] %>%
+    .[, .(target, pct_change, obs, target_end_date, lwr_quantile, upr_quantile, change_bin)] %>%
+    .[order(target)]
+  expect_equal(full_classif(dat = d, lag = l, pct_flat = pct_f), expected)
+})
+
 #### pct change function ####
 test_that("Test calculate_pct_change: no group by",{
-  l = 1
+  l <- 1
   d <- data.table(obs = 1:5,
                   target_end_date = "2022-01-01")
   expected <- d[, ":=" (pct_change = c(NA, log(2:5)-log(1:4)))] %>%
@@ -17,7 +38,7 @@ test_that("Test calculate_pct_change: no group by",{
 
 
 test_that("Test calculate_pct_change: 0 value",{
-  l = 1
+  l <- 1
   d <- data.table(obs = 0:5,
                   target_end_date = "2022-01-01")
   expected <- d[, ":=" (pct_change = c(NA, log(1:5)-log(c(1,1:4))))] %>%
@@ -26,7 +47,7 @@ test_that("Test calculate_pct_change: 0 value",{
 })
 
 test_that("Test calculate_pct_change: group by",{
-  l = 1
+  l <- 1
   d <- setDT(expand.grid(grp1 = c("A", "B"),
                          grp2 = c("1", "2"),
                          obs = 0:5,
@@ -42,7 +63,7 @@ test_that("Test calculate_pct_change: group by",{
 
 
 test_that("Test calculate_pct_change: group by",{
-  l = 1
+  l <- 1
   d <- setDT(expand.grid(grp1 = c("A", "B"),
                          grp2 = c("1", "2"),
                          obs = 0:5,
@@ -70,7 +91,7 @@ test_that("Test calc_thresh: simple",{
 
 
 test_that("Test calc_thresh: NA included",{
-  pct_f = 0.3
+  pct_f <- 0.3
   d <- setDT(expand.grid(target = c("A", "B", "C"),
                          pct_change = c(NA,0:100)))
   expected <- data.table(target = as.factor(c("A", "B", "C")),

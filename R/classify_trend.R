@@ -12,11 +12,12 @@
 #' @return
 #'
 #' @export
-full_classif <- function(dat, lag, byvars, pct_flat,
+full_classif <- function(dat, lag, pct_flat, byvars = NULL,
                          calc_thresh_flag = TRUE, thresh = NA){
-  p <- calc_pctchange(dat, lag, byvars)
+  if(!("target" %in% byvars)){byvars = c("target", byvars)}
+  p <- calculate_pct_change(dat, lag, byvars)
   if(calc_thresh_flag){
-    thresh <- calc_thresh(p, pct_flat)
+    thresh <- calc_thresh(dat_change = p, pct_flat = pct_flat)
   }
   r <- classify_incdec(p, thresh)
   return(r)
