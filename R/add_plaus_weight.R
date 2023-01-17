@@ -43,12 +43,14 @@ plaus_weight_by_scenario <- function(p = "code/evaluation/data/MostPlausibleScen
              C = as.double(C),
              D = as.double(D))] %>%
     data.table::melt("round", variable.name = "scenario", value.name = "plaus_scenario") %>%
-    setnames(old = "scenario", new = "scenario_letter")
-    proj <- plaus[proj[, scenario_letter := substr(scenario_id, 1,1)], on = .(scenario_letter, round)] %>%
-      # set plaus weights to 1 for null models
-      .[, ":=" (plaus_scenario = ifelse(substr(model_name,1,4) == "null", 1, plaus_scenario))]
-    proj <- proj[ , scenario_letter := NULL]
-    return(proj)
+    setnames(old = "scenario", new = "scenario_letter") %>%
+    # adjust plaus weight if multiple scenarios are plausible
+    .[, plaus_scenario := plaus_scenario/sum(plaus_scenario), by = .(round)]
+  proj <- plaus[proj[, scenario_letter := substr(scenario_id, 1,1)], on = .(scenario_letter, round)] %>%
+    # set plaus weights to 1 for null models
+    .[, ":=" (plaus_scenario = ifelse(substr(model_name,1,4) == "null", 1, plaus_scenario))]
+  proj <- proj[ , scenario_letter := NULL]
+  return(proj)
 }
 
 #' add plausible weight by week
