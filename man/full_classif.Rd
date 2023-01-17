@@ -4,16 +4,23 @@
 \alias{full_classif}
 \title{implement entire process to classify data as increasing, flat or decreasing}
 \usage{
-full_classif(dat, lag, byvars, pct_flat, calc_thresh_flag = TRUE, thresh = NA)
+full_classif(
+  dat,
+  lag,
+  pct_flat,
+  byvars = NULL,
+  calc_thresh_flag = TRUE,
+  thresh = NA
+)
 }
 \arguments{
 \item{lag}{integer lag of \% change calculation (e.g., \code{lag = 2} implies
 the \% change will be from \code{t-2} to \code{t})}
 
+\item{pct_flat}{double specifying the \% of data that should be classified as "flat"}
+
 \item{byvars}{vector of strings describing columns to group by when calculating
 \% change}
-
-\item{pct_flat}{double specifying the \% of data that should be classified as "flat"}
 
 \item{calc_thresh_flag}{logical TRUE to calculate the threshold}
 
