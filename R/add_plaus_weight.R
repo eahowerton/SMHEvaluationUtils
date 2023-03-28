@@ -9,12 +9,14 @@
 #' @return proj data.table containing projections with column for scenario plausibility
 #'
 #' @export
-add_plaus_weight <- function(proj, variant_takeover, keep_flags = FALSE){
+add_plaus_weight <- function(proj, variant_takeover, modelname_round_weight, keep_flags = FALSE){
   proj <- plaus_weight_by_scenario(proj = proj)
   proj <- plaus_weight_by_week(variant_takeover = variant_takeover,
                                proj = proj)
+  proj <- plaus_weight_by_model_name(modelname_round_weight = modelname_round_weight,
+                                     proj = proj)
   # combine flags
-  proj <- proj[, plaus_weight := ifelse(plaus_week == 0, 0, plaus_scenario)]
+  proj <- proj[, plaus_weight := plaus_week*plaus_scenario*plaus_mod]
   if(!keep_flags){
     proj <- proj[, ":=" (plaus_scenario = NULL,
                          plaus_week = NULL)]
@@ -64,14 +66,32 @@ plaus_weight_by_scenario <- function(p = "code/evaluation/data/MostPlausibleScen
 plaus_weight_by_week <- function(variant_takeover,
                                      proj){
   proj <- proj[, plaus_week := ifelse(round == 1 &
-                                        target_end_date >= as.Date(variant_takeover_date["alpha"]),
+                                        target_end_date >= as.Date(variant_takeover["alpha"]),
                                       0, 1)]
   proj <- proj[, plaus_week := ifelse(round %in% 1:5 &
-                                        target_end_date >= as.Date(variant_takeover_date["delta"]),
+                                        target_end_date >= as.Date(variant_takeover["delta"]),
                                       0, plaus_week)]
   proj <- proj[, plaus_week := ifelse(round %in% 1:10 &
-                                        target_end_date >= as.Date(variant_takeover_date["omicron"]),
+                                        target_end_date >= as.Date(variant_takeover["omicron"]),
                                       0, plaus_week)]
+  return(proj)
+}
+
+#' add plausible weight by model name
+#'
+#' @param modelname_round_weight data.frame containing modelname, round to be given
+#'        differential weight, weight column specifies what this should be
+#' @param proj data.table containing projections to determine plausibility
+#'
+#' @return proj data.table containing projections with column for scenario plausibility
+#'
+#' @export
+plaus_weight_by_model_name <- function(modelname_round_weight, proj){
+  proj$plaus_mod = 1
+  for(i in 1:nrow(modelname_round_weight)){
+   proj[model_name == modelname_round_weight[i,"model_name"] &
+          round == modelname_round_weight[i,"round"], "plaus_mod"] =  modelname_round_weight[i,"weight"]
+  }
   return(proj)
 }
 
