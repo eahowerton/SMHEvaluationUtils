@@ -14,6 +14,7 @@ compile_SMH_projections <- function(proj,
                                 list2round,
                                 proj_period_key,
                                 scenario_round_key,
+                                inc_only = TRUE,
                                 rounds_to_include = NA,
                                 summarize_exclusions = FALSE){
   list2round <- as.integer(list2round)
@@ -33,7 +34,7 @@ compile_SMH_projections <- function(proj,
     proj[[i]] <- implement_all_exclusions(proj[[i]],
                                           proj_period = proj_period_key,
                                           scenario_round = scenario_round_key,
-                                          inc_only = TRUE,
+                                          inc_only = inc_only,
                                           summarize_exclusions = summarize_exclusions,
                                           summarize_exclusions_path = paste0("code/evaluation/data/exclusions/excluded", i,".csv"))
   }
