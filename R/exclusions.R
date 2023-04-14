@@ -19,7 +19,7 @@ implement_all_exclusions <- function(proj,
                                      scenario_round,
                                      inc_only = TRUE,
                                      summarize_exclusions = FALSE,
-                                     summarize_exclusions_path = "code/evaluation/data/exclusions.csv"){
+                                     summarize_exclusions_path){
   proj <- exclude_NA_vals(proj)
   proj <- exclude_quantile01(proj)
   proj <- exclude_non_public(proj)
@@ -36,13 +36,22 @@ implement_all_exclusions <- function(proj,
     .[, any_exclusion := ifelse(any_exclusion == 0, 0, 1)]
   # summarize exclusions
   if(summarize_exclusions){
-    write.csv(proj[any_exclusion > 0], summarize_exclusions_path)
+    summarize_exclusions_to_txt(proj, summarize_exclusions_path)
   }
   return(proj[any_exclusion == 0] %>%
            set(NULL, c("any_exclusion", colnames(select(proj, starts_with("e_")))), NULL))
 }
 
 #### HELPERS -------------------------------------------------------------------
+
+summarize_exclusions_to_txt <- function(proj, exc_path){
+  s <- proj %>%
+    select(scenario_id, target, target_end_date, location, model_name, starts_with("e_"), any_exclusion) %>%
+    unique() %>%
+    melt(c("scenario_id", "target", "target_end_date", "location", "model_name")) %>%
+    .[, .(n = sum(value)), by = .(model_name, location, variable)]
+  write.csv(s, exc_path)
+}
 
 exclude_cum_proj <- function(proj){
   proj[substr(target,1,3) != "cum"]
@@ -79,7 +88,7 @@ exclude_non_monotonic <- function(proj, tol = 1E-4){
 }
 
 exclude_outside_projperiod <- function(proj, proj_period){
-  proj[, e_wrongdate := ifelse(paste0(round, target_end_date) %in%
+  proj[, e_wrong_date := ifelse(paste0(round, target_end_date) %in%
                                  paste0(proj_period$round, proj_period$target_end_date), 0, 1)]
 }
 

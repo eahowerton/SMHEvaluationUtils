@@ -17,10 +17,25 @@ compile_SMH_projections <- function(proj,
                                 inc_only = TRUE,
                                 rounds_to_include = NA,
                                 summarize_exclusions = FALSE){
+  # create file to summarize exclusions if required
   list2round <- as.integer(list2round)
-  if(!any(is.na(rounds_to_include))){
-    proj <- proj[which(list2round %in% rounds_to_include)]
-    list2round <- list2round[list2round %in% rounds_to_include]
+  if(!any(is.na(rounds_to_include))){ # if rounds_to_include is specified
+    exc <- which(!(list2round %in% rounds_to_include))
+    if(summarize_exclusions){ # if summarizing exclusions
+      for(i in exc){
+        s <- proj[[i]] %>%
+          setDT() %>%
+          .[, .(scenario_id, target, target_end_date, location, model_name)] %>%
+          unique() %>%
+          .[, .(n = .N), by = .(model_name, location)] %>%
+          .[, variable := "any_exclusion"]
+        write.csv(s,
+                  paste0("code/evaluation/data/exclusions/excluded", list2round[i],".csv"))
+      }
+    }
+    inc <- which(list2round %in% rounds_to_include)
+    #proj <- proj[inc]
+    #list2round <- list2round[list2round %in% rounds_to_include]
   }
   if(length(list2round) == 1){
     proj <- list(proj)
@@ -30,15 +45,15 @@ compile_SMH_projections <- function(proj,
   proj <- lapply(1:length(proj), process_single_proj_element,
                  proj = proj, list2round = list2round)
   # exclusions
-  for(i in 1:length(proj)){
+  for(i in inc){
     proj[[i]] <- implement_all_exclusions(proj[[i]],
                                           proj_period = proj_period_key,
                                           scenario_round = scenario_round_key,
                                           inc_only = inc_only,
                                           summarize_exclusions = summarize_exclusions,
-                                          summarize_exclusions_path = paste0("code/evaluation/data/exclusions/excluded", i,".csv"))
+                                          summarize_exclusions_path = paste0("code/evaluation/data/exclusions/excluded", list2round[i],".csv"))
   }
-  proj <- rbindlist(unname(proj), fill = TRUE)
+  proj <- rbindlist(unname(proj[inc]), fill = TRUE)
 }
 
 #### HELPERS -------------------------------------------------------------------
