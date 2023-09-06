@@ -9,8 +9,11 @@
 #' @return proj data.table containing projections with column for scenario plausibility
 #'
 #' @export
-add_plaus_weight <- function(proj, variant_takeover, modelname_round_weight, keep_flags = FALSE){
-  proj <- plaus_weight_by_scenario(proj = proj)
+add_plaus_weight <- function(proj, variant_takeover,
+                             modelname_round_weight,
+                             keep_flags = FALSE,
+                             p = "code/evaluation/data/MostPlausibleScenarios.csv"){
+  proj <- plaus_weight_by_scenario(proj = proj, p = p)
   proj <- plaus_weight_by_week(variant_takeover = variant_takeover,
                                proj = proj)
   proj <- plaus_weight_by_model_name(modelname_round_weight = modelname_round_weight,

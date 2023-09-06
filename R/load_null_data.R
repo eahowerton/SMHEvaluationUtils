@@ -9,12 +9,14 @@
 #' @param only_win_proj_period logical TRUE if FH projections will be loaded for
 #'        only dates within projection period (others are included in the file
 #'        for increasing/decreasing calculations)
+#' @param p string of location of
 #'
 #' @export
-load_all_null_projs <- function(only_win_proj_period = TRUE){
-  proj_null_gam <- load_null_gam()
-  proj_null_fh <- load_null_fh(pp_flag = only_win_proj_period)
-  proj_null_naive <- load_null_naive(pp_flag = only_win_proj_period)
+load_all_null_projs <- function(only_win_proj_period = TRUE,
+                                p = "code/evaluation/data/"){
+  proj_null_gam <- load_null_gam(p)
+  proj_null_fh <- load_null_fh(pp_flag = only_win_proj_period, p)
+  proj_null_naive <- load_null_naive(pp_flag = only_win_proj_period, p)
   proj_null <- rbindlist(list(proj_null_gam,
                               proj_null_fh,
                               proj_null_naive),
@@ -27,7 +29,8 @@ load_all_null_projs <- function(only_win_proj_period = TRUE){
 #' @param p string path to file containing null projections
 #'
 #' @export
-load_null_gam <- function(p = "code/evaluation/data/GAM_proj.csv"){
+load_null_gam <- function(p = "code/evaluation/data/"){
+  p <- file.path(paste0(p,"GAM_proj.csv"))
   proj_null_gam <- setDT(read.csv(p)) %>%
     .[,":=" (X = NULL,
              target_end_date = as.IDate(target_end_date),
@@ -47,7 +50,8 @@ load_null_gam <- function(p = "code/evaluation/data/GAM_proj.csv"){
 #'
 #' @export
 load_null_fh <- function(pp_flag = TRUE,
-                         p = "code/evaluation/data/FH_proj.csv"){
+                         p = "code/evaluation/data/"){
+  p <- file.path(paste0(p,"FH_proj.csv"))
   proj_null_fh <- setDT(read.csv(p)) %>%
     .[,":=" (X = NULL,
              target_end_date = as.IDate(target_end_date),
@@ -68,7 +72,8 @@ load_null_fh <- function(pp_flag = TRUE,
 #'
 #' @export
 load_null_naive <- function(pp_flag = TRUE,
-                            p = "code/evaluation/data/naive_proj.csv"){
+                            p = "code/evaluation/data/"){
+  p <- file.path(paste0(p,"naive_proj.csv"))
   proj_null_naive <- setDT(read.csv(p)) %>%
     .[,":=" (X = NULL,
              target_end_date = as.IDate(target_end_date),

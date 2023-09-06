@@ -35,7 +35,7 @@ implement_all_exclusions <- function(proj,
   proj[, any_exclusion := rowSums(select(.SD, starts_with("e_")))] %>%
     .[, any_exclusion := ifelse(any_exclusion == 0, 0, 1)]
   # summarize exclusions
-  if(summarize_exclusions){
+  if(!is.null(summarize_exclusions)){
     summarize_exclusions_to_txt(proj, summarize_exclusions_path)
   }
   return(proj[any_exclusion == 0] %>%
@@ -46,9 +46,9 @@ implement_all_exclusions <- function(proj,
 
 summarize_exclusions_to_txt <- function(proj, exc_path){
   s <- proj %>%
-    select(scenario_id, target, target_end_date, location, model_name, starts_with("e_"), any_exclusion) %>%
+    dplyr::select(scenario_id, target, target_end_date, location, model_name, starts_with("e_"), any_exclusion) %>%
     unique() %>%
-    melt(c("scenario_id", "target", "target_end_date", "location", "model_name")) %>%
+    data.table::melt(c("scenario_id", "target", "target_end_date", "location", "model_name")) %>%
     .[, .(n = sum(value)), by = .(model_name, location, variable)]
   write.csv(s, exc_path)
 }
